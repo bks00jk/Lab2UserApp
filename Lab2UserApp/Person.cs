@@ -1,7 +1,9 @@
-﻿using System;
+﻿using KMA.ProgrammingInCSharp2023.Lab2UserApp.Tools.Exceptions;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace KMA.ProgrammingInCSharp2023.Lab2UserApp
@@ -23,13 +25,32 @@ namespace KMA.ProgrammingInCSharp2023.Lab2UserApp
         #region Constructors
         public Person(string firstName, string lastName, string email, DateTime birthDate)
         {
+            CheckAge(birthDate);
+
+            string name_pattern = @"^[A-Za-z]+$";
+            string email_pattern = @"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$";
+
+            if (!Regex.IsMatch(firstName, name_pattern))
+            {
+                throw new InvalidNameException($"Invalid name : {firstName}! \nThe name should consist of only uppercase and lowercase letters, \nwithout any numbers or special characters!");
+            }
+            if (!Regex.IsMatch(lastName, name_pattern))
+            {
+                throw new InvalidNameException($"Invalid surname : {lastName}!\nThe surname should consist of only uppercase and lowercase letters, \nwithout any numbers or special characters!");
+            }
+            if(!Regex.IsMatch(email, email_pattern))
+            {
+                throw new InvalidEmailException($"Invalid email : {email}!");
+            }
+
             _firstName = firstName;
             _lastName = lastName;
             _email = email;
             _birthDate = birthDate;
-            CheckAge(birthDate);
+
             FindSunSign(birthDate);
             FindChineseSign(birthDate);
+
         }
 
         public Person(string firstName, string lastName, string email) : this(firstName, lastName, email, DateTime.Today)
@@ -154,6 +175,15 @@ namespace KMA.ProgrammingInCSharp2023.Lab2UserApp
             if (DateTime.Today.Month < birthDate.Month || (DateTime.Today.Month == birthDate.Month && DateTime.Today.Day < birthDate.Day))
             {
                 _age--;
+            }
+
+            if (_age < 0)
+            {
+                throw new FutureBirthdayException($"Invalid birth date : {birthDate}! \nThe event has not yet occurred!");
+            }
+            else if (_age > 135)
+            {
+                throw new PastBirthdayException($"Invalid birth date : {birthDate}! \nDate is too old to be birthday!");
             }
 
             _isAdult = _age >= 18;

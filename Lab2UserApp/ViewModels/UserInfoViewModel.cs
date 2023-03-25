@@ -1,5 +1,6 @@
 ﻿using KMA.ProgrammingInCSharp2023.Lab2UserApp.Managers;
 using KMA.ProgrammingInCSharp2023.Lab2UserApp.Tools;
+using KMA.ProgrammingInCSharp2023.Lab2UserApp.Tools.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -99,26 +100,39 @@ namespace KMA.ProgrammingInCSharp2023.Lab2UserApp.ViewModels
             LoaderManager.Instance.ShowLoader();
             await Task.Run(() =>
             {
-                _person = new Person(FirstName, LastName, Email, BirthDate);
-                if (_person.Age < 0)
+                try
                 {
-                    MessageBox.Show("Sorry, you have not been born yet.\nChoose another date", "Wrong Date", MessageBoxButton.OK);
+                    _person = new Person(FirstName, LastName, Email, BirthDate);
                 }
-                else if (_person.Age > 135)
+                catch(InvalidEmailException e)
                 {
-                    MessageBox.Show("Sorry, you are too old to be alive.\nChoose another date", "Wrong Date", MessageBoxButton.OK);
+                    MessageBox.Show(e.Message, "Wrong Email", MessageBoxButton.OK);
+                    return;
                 }
-                else
+                catch (PastBirthdayException e)
                 {
-                    if (_person.IsBirthday)
-                    {
-                        MessageBox.Show("Happy Birthday! \nWe wish you all the best!", "Congratulations", MessageBoxButton.OK);
-                    }
-                    String info =
-                         $"Name: {_person.FirstName}\nSurname: {_person.LastName}\nEmail: {_person.Email}\nBirthday: {_person.BirthDate}\n" +
-                         $"Is Adult: {_person.IsAdult}\nSun Sign: {_person.SunSign}\nChinese Sign: {_person.ChineseSign}\nIs Birthday: {_person.IsBirthday}";
-                    MessageBox.Show(info, "User Info", MessageBoxButton.OK);
+                    MessageBox.Show(e.Message, "Wrong Date", MessageBoxButton.OK);
+                    return;
                 }
+                catch (FutureBirthdayException e)
+                {
+                    MessageBox.Show(e.Message, "Wrong Date", MessageBoxButton.OK);
+                    return;
+                }
+                catch (InvalidNameException e)
+                {
+                    MessageBox.Show(e.Message, "Wrong Name or Surname", MessageBoxButton.OK);
+                    return;
+                }
+
+                if (_person.IsBirthday)
+                {
+                    MessageBox.Show("Happy Birthday! \nWe wish you all the best!", "Congratulations", MessageBoxButton.OK);
+                }
+                String info =
+                     $"Name: {_person.FirstName}\nSurname: {_person.LastName}\nEmail: {_person.Email}\nBirthday: {_person.BirthDate}\n" +
+                     $"Is Adult: {_person.IsAdult}\nSun Sign: {_person.SunSign}\nChinese Sign: {_person.ChineseSign}\nIs Birthday: {_person.IsBirthday}";
+                MessageBox.Show(info, "User Info", MessageBoxButton.OK);
             });
             LoaderManager.Instance.HideLoader();
         }
